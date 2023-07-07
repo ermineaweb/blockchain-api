@@ -5,9 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
-	"os"
 	"server/src/core/entity"
 	"time"
 )
@@ -30,38 +28,41 @@ type JsonRpcResponse struct {
 	Result  []any  `json:"result"`
 }
 
-var accounts = []entity.Account{{Address: "abc", Balance: 15}, {Address: "def", Balance: 20}}
-
 func NewJsonRpc(url string) JsonRpc {
 	client := http.Client{Timeout: 5 * time.Second}
 	return JsonRpc{url, client}
 }
 
-func (r JsonRpc) GetOne(address string) (entity.Account, error) {
-	for _, account := range accounts {
-		if account.Address == address {
-			return account, nil
-		}
-	}
-	return entity.Account{}, errors.New("account not found")
+func (r JsonRpc) Get(address string) (entity.Account, error) {
+	// TODO
+	return entity.Account{Address: "abc", Balance: 15}, errors.New("account not found")
 }
 
 func (r JsonRpc) GetAll() []entity.Account {
-	var request = JsonRpcRequest{Id: 1, JsonRpc: "2.0", Method: "eth_accounts", Params: make([]string, 0)}
-	marshalled, _ := json.Marshal(request)
+	jsonRequest := JsonRpcRequest{Id: 1, JsonRpc: "2.0", Method: "eth_accounts", Params: make([]string, 0)}
+	body := new(bytes.Buffer)
+	json.NewEncoder(body).Encode(jsonRequest)
 
-	req, _ := http.NewRequest("POST", r.url, bytes.NewReader(marshalled))
+	req, err := http.NewRequest("POST", r.url, body)
 	req.Header.Set("Content-Type", "application/json")
+	if err != nil {
+		fmt.Println(err.Error())
+		return []entity.Account{}
+	}
+
 	res, err := r.client.Do(req)
 	if err != nil {
-		fmt.Printf("error making http request: %s\n", err)
-		os.Exit(1)
+		fmt.Println(err.Error())
+		return []entity.Account{}
 	}
-	defer res.Body.Close()
-	body, _ := io.ReadAll(res.Body)
-	var response JsonRpcResponse
-	_ = json.Unmarshal(body, &response)
-	fmt.Printf("%+v\n", response)
+
+	response := new(JsonRpcResponse)
+	json.NewDecoder(res.Body).Decode(&response)
+
+	var accounts []entity.Account
+	for _, res := range response.Result {
+		accounts = append(accounts, entity.Account{Address: res.(string), Balance: 15})
+	}
 
 	return accounts
 }

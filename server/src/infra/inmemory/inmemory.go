@@ -9,7 +9,7 @@ type InMemoryRepository struct{}
 
 var accounts = []entity.Account{{Address: "abc", Balance: 15}, {Address: "def", Balance: 20}}
 
-func (r InMemoryRepository) GetOne(address string) (entity.Account, error) {
+func (r InMemoryRepository) Get(address string) (entity.Account, error) {
 	for _, account := range accounts {
 		if account.Address == address {
 			return account, nil
