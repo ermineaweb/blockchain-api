@@ -34,18 +34,3 @@ class JsonRpcRepository implements Repository<Account> {
 }
 
 export default JsonRpcRepository;
-
-/*
-type JsonRpcRequest struct {
-	Id      int      `json:"id"`
-	JsonRpc string   `json:"jsonrpc"`
-	Method  string   `json:"method"`
-	Params  []string `json:"params"`
-}
-
-type JsonRpcResponse struct {
-	Id      int    `json:"id"`
-	JsonRpc string `json:"jsonrpc"`
-	Result  []any  `json:"result"`
-}
-*/
