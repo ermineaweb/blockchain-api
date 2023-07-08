@@ -2,7 +2,6 @@
 
 APP_NAME="blockchain"
 
-# -p 8545:8545 \
 docker build -t "$APP_NAME":latest .
 docker run -it \
 --net host \
